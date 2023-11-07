@@ -21,6 +21,10 @@ class PiTank(Thread):
     ROTATERIGHT = 2
     ROTATELEFT = -2
 
+    RIGHT = 1
+    CENTER = 0
+    LEFT = -1
+
     def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.5, args = ..., kwargs = {}):
         super().__init__(group=None, target=None, name=None, args=args, kwargs=kwargs, daemon=False)
 
@@ -52,11 +56,8 @@ class PiTank(Thread):
         self.minSpeed = minSpeed
         self.maxSpeed = maxSpeed
       
-        # -1 left 0 straight 1 right
-        self.directionState = 0
-
-        # -1 backward 0 stopped 1 forward
-        self.movementState = 0
+        self.directionState = PiTank.CENTER
+        self.movementState = PiTank.STOPPED
 
         self.movementThread = Thread(target = self.move, daemon=True)
         self.movementThread.start()
@@ -165,12 +166,12 @@ class PiTank(Thread):
 
 
     def turnRight(self):
-        if self.directionState + 1 <= 1:
+        if self.directionState + 1 <= PiTank.RIGHT:
             self.directionState += 1
 
 
     def turnLeft(self):
-        if self.directionState - 1 >= -1:
+        if self.directionState - 1 >= PiTank.LEFT:
             self.directionState -= 1
 
 
@@ -186,16 +187,16 @@ class PiTank(Thread):
             msg = raw.decode().lower()
 
             if msg == 'forward_pressed':
-                self.movementState = 1
-                self.directionState = 0
+                self.movementState = PiTank.FORWARD
+                self.directionState = PiTank.CENTER
         
             elif msg == "stop_pressed":
-                self.movementState = 0
-                self.directionState = 0
+                self.movementState = PiTank.STOPPED
+                self.directionState = PiTank.CENTER
 
             elif msg == "backward_pressed":
-                self.movementState = -1
-                self.directionState = 0
+                self.movementState = PiTank.BACKWARD
+                self.directionState = PiTank.CENTER
 
             elif msg == "increase_speed":
                 self.increaseSpeed()
@@ -210,12 +211,12 @@ class PiTank(Thread):
                 self.turnLeft()
 
             elif msg == "rotate_right_pressed":
-                self.movementState = 2
-                self.directionState = 0
+                self.movementState = PiTank.ROTATERIGHT
+                self.directionState = PiTank.CENTER
 
             elif msg == "rotate_left_pressed":
-                 self.movementState = -2
-                 self.directionState = 0
+                 self.movementState = PiTank.ROTATELEFT
+                 self.directionState = PiTank.CENTER
             
             elif msg.startswith("testing:"):
                 print(msg, addr)
