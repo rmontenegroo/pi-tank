@@ -66,7 +66,7 @@ class PiTank(Thread):
         GPIO.setup(self.buzzerPin, GPIO.OUT)
 
         self.beeping = False
-        GPIO.output(self.buzzerPin, GPIO.LOW)
+        GPIO.output(self.buzzerPin, GPIO.HIGH)
 
         self.beepingThread = Thread(target = self.beep, daemon = True)
         self.beepingThread.start()
