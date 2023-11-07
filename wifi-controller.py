@@ -1,7 +1,7 @@
-# import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import socket
 from os import system
-from threading import Thread, Semaphore
+from threading import Thread
 from time import sleep
 
 class PiTank(Thread):
@@ -27,21 +27,21 @@ class PiTank(Thread):
         self.sleepTime = sleepTime
         self.running = True
 
-        # GPIO.setmode(GPIO.BCM)
-        # GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
 
         # motores
-        # GPIO.setup(self.ENA,GPIO.OUT,initial=GPIO.HIGH)
-        # GPIO.setup(self.IN1,GPIO.OUT,initial=GPIO.LOW)
-        # GPIO.setup(self.IN2,GPIO.OUT,initial=GPIO.LOW)
-        # GPIO.setup(self.ENB,GPIO.OUT,initial=GPIO.HIGH)
-        # GPIO.setup(self.IN3,GPIO.OUT,initial=GPIO.LOW)
-        # GPIO.setup(self.IN4,GPIO.OUT,initial=GPIO.LOW)
+        GPIO.setup(self.ENA,GPIO.OUT,initial=GPIO.HIGH)
+        GPIO.setup(self.IN1,GPIO.OUT,initial=GPIO.LOW)
+        GPIO.setup(self.IN2,GPIO.OUT,initial=GPIO.LOW)
+        GPIO.setup(self.ENB,GPIO.OUT,initial=GPIO.HIGH)
+        GPIO.setup(self.IN3,GPIO.OUT,initial=GPIO.LOW)
+        GPIO.setup(self.IN4,GPIO.OUT,initial=GPIO.LOW)
            
-        # self.pwm_ENA = GPIO.PWM(self.ENA, 2000)
-        # self.pwm_ENB = GPIO.PWM(self.ENB, 2000)
-        # self.pwm_ENA.start(0)
-        # self.pwm_ENB.start(0)
+        self.pwm_ENA = GPIO.PWM(self.ENA, 2000)
+        self.pwm_ENB = GPIO.PWM(self.ENB, 2000)
+        self.pwm_ENA.start(0)
+        self.pwm_ENB.start(0)
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
         self.socket.settimeout(2)
@@ -62,7 +62,7 @@ class PiTank(Thread):
         self.movementThread.start()
 
         # buzzer
-        # GPIO.setup(self.buzzerPin, GPIO.OUT)
+        GPIO.setup(self.buzzerPin, GPIO.OUT)
 
         self.beeping = False
 
@@ -77,9 +77,9 @@ class PiTank(Thread):
         while self.running:
 
             if self.beeping:
-                # GPIO.output(self.buzzerPin, GPIO.HIGH)
+                GPIO.output(self.buzzerPin, GPIO.HIGH)
                 sleep(self.sleepTime)
-                # GPIO.output(self.buzzerPin, GPIO.LOW)
+                GPIO.output(self.buzzerPin, GPIO.LOW)
                 sleep(self.sleepTime)
 
                 print('Beep!')
@@ -87,7 +87,7 @@ class PiTank(Thread):
             else:
                 sleep(self.sleepTime)
 
-        # GPIO.output(self.buzzerPin, GPIO.HIGH)
+        GPIO.output(self.buzzerPin, GPIO.HIGH)
 
 
     def move(self):
@@ -96,46 +96,46 @@ class PiTank(Thread):
             
             if self.movementState == PiTank.FORWARD:
                 # esta indo para frente
-                # GPIO.output(IN1, GPIO.LOW)
-                # GPIO.output(IN2, GPIO.HIGH)
-                # GPIO.output(IN3, GPIO.LOW)
-                # GPIO.output(IN4, GPIO.HIGH)
+                GPIO.output(self.IN1, GPIO.LOW)
+                GPIO.output(self.IN2, GPIO.HIGH)
+                GPIO.output(self.IN3, GPIO.LOW)
+                GPIO.output(self.IN4, GPIO.HIGH)
                 print('Forward')
 
             elif self.movementState == PiTank.BACKWARD:
                 # esta indo para tras
-                # GPIO.output(IN1, GPIO.HIGH)
-                # GPIO.output(IN2, GPIO.LOW)
-                # GPIO.output(IN3, GPIO.HIGH)
-                # GPIO.output(IN4, GPIO.LOW)
+                GPIO.output(self.IN1, GPIO.HIGH)
+                GPIO.output(self.IN2, GPIO.LOW)
+                GPIO.output(self.IN3, GPIO.HIGH)
+                GPIO.output(self.IN4, GPIO.LOW)
                 print('Backward')
 
             elif self.movementState == PiTank.STOPPED:
                 # esta parado
-                # GPIO.output(IN1, GPIO.LOW)
-                # GPIO.output(IN2, GPIO.LOW)
-                # GPIO.output(IN3, GPIO.LOW)
-                # GPIO.output(IN4, GPIO.LOW)
+                GPIO.output(self.IN1, GPIO.LOW)
+                GPIO.output(self.IN2, GPIO.LOW)
+                GPIO.output(self.IN3, GPIO.LOW)
+                GPIO.output(self.IN4, GPIO.LOW)
                 print('Stopped')
         
             elif self.movementState == PiTank.ROTATERIGHT:
-                # GPIO.output(IN1, GPIO.LOW)
-                # GPIO.output(IN2, GPIO.HIGH)
-                # GPIO.output(IN3, GPIO.HIGH)
-                # GPIO.output(IN4, GPIO.LOW)
+                GPIO.output(self.IN1, GPIO.LOW)
+                GPIO.output(self.IN2, GPIO.HIGH)
+                GPIO.output(self.IN3, GPIO.HIGH)
+                GPIO.output(self.IN4, GPIO.LOW)
                 print('Rotate right')
 
             elif self.movementState == PiTank.ROTATELEFT:
-                # GPIO.output(IN1, GPIO.HIGH)
-                # GPIO.output(IN2, GPIO.LOW)
-                # GPIO.output(IN3, GPIO.LOW)
-                # GPIO.output(IN4, GPIO.HIGH) 
+                GPIO.output(self.IN1, GPIO.HIGH)
+                GPIO.output(self.IN2, GPIO.LOW)
+                GPIO.output(self.IN3, GPIO.LOW)
+                GPIO.output(self.IN4, GPIO.HIGH) 
                 print('Rotate left')
 
             print(f"Speed: {self.leftSpeed()} {self.rightSpeed()}")
 
-            # self.pwm_ENA.ChangeDutyCycle(self.rightSpeed())
-            # self.pwm_ENB.ChangeDutyCycle(self.leftSpeed())
+            self.pwm_ENA.ChangeDutyCycle(self.rightSpeed())
+            self.pwm_ENB.ChangeDutyCycle(self.leftSpeed())
 
             sleep(self.sleepTime)
 
@@ -175,9 +175,6 @@ class PiTank(Thread):
 
 
     def run(self) -> None:
-
-        # GPIO.setmode(GPIO.BCM)
-        # GPIO.setwarnings(False)
 
         while self.running:
 
