@@ -11,7 +11,9 @@ class PiTank(Thread):
     IN3 = 19
     IN4 = 26
     ENA = 16
-    ENB = 13    
+    ENB = 13
+
+    buzzerPin = 8
 
     FORWARD = 1
     STOPPED = 0
@@ -22,17 +24,20 @@ class PiTank(Thread):
     def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.5, args = ..., kwargs = {}):
         super().__init__(group=None, target=None, name=None, args=args, kwargs=kwargs, daemon=False)
 
-        # GPIO.setmode(GPIO.BCM)
+        self.sleepTime = sleepTime
+        self.running = True
 
+        # GPIO.setmode(GPIO.BCM)
         # GPIO.setwarnings(False)
 
+        # motores
         # GPIO.setup(self.ENA,GPIO.OUT,initial=GPIO.HIGH)
         # GPIO.setup(self.IN1,GPIO.OUT,initial=GPIO.LOW)
         # GPIO.setup(self.IN2,GPIO.OUT,initial=GPIO.LOW)
         # GPIO.setup(self.ENB,GPIO.OUT,initial=GPIO.HIGH)
         # GPIO.setup(self.IN3,GPIO.OUT,initial=GPIO.LOW)
         # GPIO.setup(self.IN4,GPIO.OUT,initial=GPIO.LOW)
-            
+           
         # self.pwm_ENA = GPIO.PWM(self.ENA, 2000)
         # self.pwm_ENB = GPIO.PWM(self.ENB, 2000)
         # self.pwm_ENA.start(0)
@@ -46,26 +51,48 @@ class PiTank(Thread):
         self.diferentialFactor = diferentialFactor
         self.minSpeed = minSpeed
         self.maxSpeed = maxSpeed
-
-        self.sleepTime = sleepTime
-
+      
         # -1 left 0 straight 1 right
         self.directionState = 0
 
         # -1 backward 0 stopped 1 forward
         self.movementState = 0
 
-        self.running = True
-
         self.movementThread = Thread(target = self.move, daemon=True)
         self.movementThread.start()
+
+        # buzzer
+        # GPIO.setup(self.buzzerPin, GPIO.OUT)
+
+        self.beeping = False
+
+        self.beepingThread = Thread(target = self.beep, daemon = True)
+        self.beepingThread.start()
 
         print('Running...')
 
 
+    def beep(self):
+
+        while self.running:
+
+            if self.beeping:
+                # GPIO.output(self.buzzerPin, GPIO.HIGH)
+                sleep(self.sleepTime)
+                # GPIO.output(self.buzzerPin, GPIO.LOW)
+                sleep(self.sleepTime)
+
+                print('Beep!')
+            
+            else:
+                sleep(self.sleepTime)
+
+        # GPIO.output(self.buzzerPin, GPIO.HIGH)
+
+
     def move(self):
 
-        while True:
+        while self.running:
             
             if self.movementState == PiTank.FORWARD:
                 # esta indo para frente
@@ -198,8 +225,13 @@ class PiTank(Thread):
                 self.socket.sendto(raw, addr)
                 
             elif msg == "shutdown":
-                print("Shutdown")
                 system("sudo shutdown -h now")                
+
+            elif msg == 'buzzer_pressed':
+                self.beeping = True
+
+            elif msg == 'buzzer_released':
+                self.beeping = False
 
             else:
                 print(msg, addr)

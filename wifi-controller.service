@@ -3,11 +3,11 @@ Description=Wifi Controller Service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python /home/pi/Desktop/code/pi-tank01/wifi-controller.py 
+WorkingDirectory=/home/pi/Desktop/code/pi-tank/
+ExecStart=/usr/bin/git pull && /usr/bin/python /home/pi/Desktop/code/pi-tank01/wifi-controller.py 
 Restart=on-failure
 RestartSec=30s
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
 WantedBy=multi-user.target
-
