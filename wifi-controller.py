@@ -87,6 +87,7 @@ class PiTank(Thread):
                 print('Beep!')
             
             else:
+                GPIO.output(self.buzzerPin, GPIO.HIGH)
                 sleep(self.sleepTime)
 
         GPIO.output(self.buzzerPin, GPIO.HIGH)

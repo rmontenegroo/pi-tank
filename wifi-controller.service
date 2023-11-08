@@ -6,7 +6,7 @@ Type=simple
 User=pi
 Group=pi
 WorkingDirectory=/home/pi/Desktop/code/pi-tank/
-ExecStart=/usr/bin/git pull && /usr/bin/python /home/pi/Desktop/code/pi-tank01/wifi-controller.py 
+ExecStart=/usr/bin/python wifi-controller.py 
 Restart=on-failure
 RestartSec=30s
 Environment=PYTHONUNBUFFERED=1
