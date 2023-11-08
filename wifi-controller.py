@@ -25,7 +25,7 @@ class PiTank(Thread):
     CENTER = 0
     LEFT = -1
 
-    def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.5, args = ..., kwargs = {}):
+    def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.2, args = ..., kwargs = {}):
         super().__init__(group=None, target=None, name=None, args=args, kwargs=kwargs, daemon=False)
 
         self.sleepTime = sleepTime
