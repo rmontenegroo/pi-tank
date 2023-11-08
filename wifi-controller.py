@@ -65,30 +65,27 @@ class PiTank(Thread):
         # buzzer
         GPIO.setup(self.buzzerPin, GPIO.OUT)
 
-        self.beeping = False
+        self.buzzing = False
         GPIO.output(self.buzzerPin, GPIO.HIGH)
 
-        self.beepingThread = Thread(target = self.beep, daemon = True)
-        self.beepingThread.start()
+        self.buzzingThread = Thread(target = self.buzz, daemon = True)
+        self.buzzingThread.start()
 
         print('Running...')
 
 
-    def beep(self):
+    def buzz(self):
 
         while self.running:
 
-            if self.beeping:
-                GPIO.output(self.buzzerPin, GPIO.HIGH)
-                sleep(self.sleepTime)
+            if self.buzzing:
                 GPIO.output(self.buzzerPin, GPIO.LOW)
-                sleep(self.sleepTime)
-
-                print('Beep!')
+                print('Buzzing!')
             
             else:
                 GPIO.output(self.buzzerPin, GPIO.HIGH)
-                sleep(self.sleepTime)
+            
+            sleep(self.sleepTime)
 
         GPIO.output(self.buzzerPin, GPIO.HIGH)
 
@@ -103,7 +100,7 @@ class PiTank(Thread):
                 GPIO.output(self.IN2, GPIO.HIGH)
                 GPIO.output(self.IN3, GPIO.LOW)
                 GPIO.output(self.IN4, GPIO.HIGH)
-                print('Forward')
+                # print('Forward')
 
             elif self.movementState == PiTank.BACKWARD:
                 # esta indo para tras
@@ -111,7 +108,7 @@ class PiTank(Thread):
                 GPIO.output(self.IN2, GPIO.LOW)
                 GPIO.output(self.IN3, GPIO.HIGH)
                 GPIO.output(self.IN4, GPIO.LOW)
-                print('Backward')
+                # print('Backward')
 
             elif self.movementState == PiTank.STOPPED:
                 # esta parado
@@ -119,23 +116,23 @@ class PiTank(Thread):
                 GPIO.output(self.IN2, GPIO.LOW)
                 GPIO.output(self.IN3, GPIO.LOW)
                 GPIO.output(self.IN4, GPIO.LOW)
-                print('Stopped')
+                # print('Stopped')
         
             elif self.movementState == PiTank.ROTATERIGHT:
                 GPIO.output(self.IN1, GPIO.LOW)
                 GPIO.output(self.IN2, GPIO.HIGH)
                 GPIO.output(self.IN3, GPIO.HIGH)
                 GPIO.output(self.IN4, GPIO.LOW)
-                print('Rotate right')
+                # print('Rotate right')
 
             elif self.movementState == PiTank.ROTATELEFT:
                 GPIO.output(self.IN1, GPIO.HIGH)
                 GPIO.output(self.IN2, GPIO.LOW)
                 GPIO.output(self.IN3, GPIO.LOW)
                 GPIO.output(self.IN4, GPIO.HIGH) 
-                print('Rotate left')
+                # print('Rotate left')
 
-            print(f"Speed: {self.leftSpeed()} {self.rightSpeed()}")
+            # print(f"Speed: {self.leftSpeed()} {self.rightSpeed()}")
 
             self.pwm_ENA.ChangeDutyCycle(self.rightSpeed())
             self.pwm_ENB.ChangeDutyCycle(self.leftSpeed())
@@ -221,17 +218,17 @@ class PiTank(Thread):
                  self.directionState = PiTank.CENTER
             
             elif msg.startswith("testing:"):
-                print(msg, addr)
+                # print(msg, addr)
                 self.socket.sendto(raw, addr)
                 
             elif msg == "shutdown":
                 system("sudo shutdown -h now")                
 
             elif msg == 'buzzer_pressed':
-                self.beeping = True
+                self.buzzing = True
 
             elif msg == 'buzzer_released':
-                self.beeping = False
+                self.buzzing = False
 
             else:
                 print(msg, addr)
