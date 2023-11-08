@@ -15,6 +15,8 @@ class PiTank(Thread):
 
     buzzerPin = 8
 
+    lightsPin = 22, 24, 27
+
     FORWARD = 1
     STOPPED = 0
     BACKWARD = -1
@@ -25,7 +27,7 @@ class PiTank(Thread):
     CENTER = 0
     LEFT = -1
 
-    def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.2, args = ..., kwargs = {}):
+    def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.2, socketTimeout = 2, args = ..., kwargs = {}):
         super().__init__(group=None, target=None, name=None, args=args, kwargs=kwargs, daemon=False)
 
         self.sleepTime = sleepTime
@@ -48,7 +50,7 @@ class PiTank(Thread):
         self.pwm_ENB.start(0)
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
-        self.socket.settimeout(2)
+        self.socket.settimeout(socketTimeout)
         self.socket.bind((UDP_IP, UDP_PORT))
 
         self.currentSpeed = initialSpeed
@@ -70,6 +72,14 @@ class PiTank(Thread):
 
         self.buzzingThread = Thread(target = self.buzz, daemon = True)
         self.buzzingThread.start()
+
+        # lights
+        GPIO.setup(self.lightsPin[0], GPIO.OUT)
+        GPIO.setup(self.lightsPin[1], GPIO.OUT)
+        GPIO.setup(self.lightsPin[2], GPIO.OUT)
+        GPIO.output(self.lightsPin[0], GPIO.HIGH)
+        GPIO.output(self.lightsPin[1], GPIO.HIGH)
+        GPIO.output(self.lightsPin[2], GPIO.HIGH)
 
         print('Running...')
 
