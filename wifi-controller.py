@@ -144,8 +144,8 @@ class PiTank(Thread):
 
             # print(f"Speed: {self.leftSpeed()} {self.rightSpeed()}")
 
-            self.pwm_ENA.ChangeDutyCycle(self.rightSpeed())
-            self.pwm_ENB.ChangeDutyCycle(self.leftSpeed())
+            self.pwm_ENA.ChangeDutyCycle(self.leftSpeed())
+            self.pwm_ENB.ChangeDutyCycle(self.rightSpeed())
 
             sleep(self.sleepTime)
 
@@ -161,14 +161,14 @@ class PiTank(Thread):
 
 
     def rightSpeed(self):
-        if self.directionState == 1:
+        if self.directionState == PiTank.RIGHT:
             return self.currentSpeed * self.diferentialFactor
         
         return self.currentSpeed
 
 
     def leftSpeed(self):
-        if self.directionState == -1:
+        if self.directionState == PiTank.LEFT:
             return self.currentSpeed * self.diferentialFactor
     
         return self.currentSpeed
