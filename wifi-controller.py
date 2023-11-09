@@ -207,10 +207,10 @@ class PiTank(Thread):
                 self.movementState = PiTank.BACKWARD
                 self.directionState = PiTank.CENTER
 
-            elif msg == "increase_speed":
+            elif msg == "speed_increase":
                 self.increaseSpeed()
 
-            elif msg == "decrease_speed":
+            elif msg == "speed_decrease":
                 self.decreaseSpeed()
                 
             elif msg == "right_pressed":
