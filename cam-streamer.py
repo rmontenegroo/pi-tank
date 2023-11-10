@@ -3,7 +3,7 @@ import cv2
 from os import environ
 from flask import Flask, Response
 
-PORT = int(environ.get('STREAMER_PORT', '5555'))
+PORT = int(environ.get('ROBOT_SERVICE_PORT', '5050')) + 1
 
 streamer = None
 

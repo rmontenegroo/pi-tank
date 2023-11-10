@@ -1,8 +1,10 @@
 import RPi.GPIO as GPIO
 import socket
-from os import system
+from os import system, environ
 from threading import Thread
 from time import sleep
+
+PORT = int(environ.get('ROBOT_SERVICE_PORT', '5050'))
 
 class PiTank(Thread):
     
@@ -27,7 +29,7 @@ class PiTank(Thread):
     CENTER = 0
     LEFT = -1
 
-    def __init__(self, UDP_IP = "0.0.0.0", UDP_PORT = 5050, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.2, socketTimeout = 2, args = ..., kwargs = {}):
+    def __init__(self, ip = "0.0.0.0", port = PORT, sleepTime = 0.1, initialSpeed = 25, minSpeed = 5, maxSpeed = 50, diferentialFactor = 0.2, socketTimeout = 2, args = ..., kwargs = {}):
         super().__init__(group=None, target=None, name=None, args=args, kwargs=kwargs, daemon=False)
 
         self.sleepTime = sleepTime
@@ -51,7 +53,7 @@ class PiTank(Thread):
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) 
         self.socket.settimeout(socketTimeout)
-        self.socket.bind((UDP_IP, UDP_PORT))
+        self.socket.bind((ip, port))
 
         self.currentSpeed = initialSpeed
         self.diferentialFactor = diferentialFactor
