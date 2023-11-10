@@ -1,0 +1,15 @@
+[Unit]
+Description=Camera Streamer Service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/Desktop/code/pi-tank/
+ExecStart=/usr/bin/python cam-streamer.py
+Restart=on-failure
+RestartSec=30s
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
