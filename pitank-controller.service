@@ -1,12 +1,12 @@
 [Unit]
-Description=Wifi Controller Service
+Description=PiTank Controller Service
 
 [Service]
 Type=simple
 User=pi
 Group=pi
-WorkingDirectory=/home/pi/Desktop/code/pi-tank/
-ExecStart=/usr/bin/python wifi-controller.py 
+WorkingDirectory=/home/rodmonte/pi-tank/
+ExecStart=/usr/bin/python bt-joystick-controller.py
 Restart=on-failure
 RestartSec=30s
 Environment=PYTHONUNBUFFERED=1

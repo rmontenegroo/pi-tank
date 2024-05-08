@@ -1,0 +1,12 @@
+[Unit]
+Description=Shutdown beep
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory=/home/rodmonte/pi-tank/
+ExecStop=/usr/bin/python shutdown-beep.py
+
+[Install]
+WantedBy=multi-user.target
+
