@@ -3,10 +3,10 @@ Description=PiTank Controller Service
 
 [Service]
 Type=simple
-User=pi
-Group=pi
+# User=pi
+# Group=pi
 WorkingDirectory=/home/rodmonte/pi-tank/
-ExecStart=/usr/bin/python bt-joystick-controller.py
+ExecStart=/home/rodmonte/pi-tank/venv/bin/python3 bt-joystick-controller.py
 Restart=on-failure
 RestartSec=30s
 Environment=PYTHONUNBUFFERED=1
