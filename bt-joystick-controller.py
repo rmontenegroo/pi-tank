@@ -1,10 +1,9 @@
-#!/bin/python3 
-
 import evdev
 import sys
-import json
+# import json
 import time
 import multiprocessing
+# import math
 
 import logging
 logging.getLogger().setLevel('DEBUG')
@@ -88,14 +87,12 @@ class PiTank(Thread):
 
         # buzzer
         GPIO.setup(self.buzzerPin, GPIO.OUT)
-
-        self.buzzing = False
         GPIO.output(self.buzzerPin, GPIO.HIGH)
-
+        # self.buzzing = False
         self.__beep(3)
 
-        self.buzzingThread = Thread(target = self.buzz, daemon = True)
-        self.buzzingThread.start()
+        # self.buzzingThread = Thread(target = self.buzz, daemon = True)
+        # self.buzzingThread.start()
 
         # lights
         GPIO.setup(self.lightsPin[0], GPIO.OUT)
@@ -138,20 +135,20 @@ class PiTank(Thread):
         GPIO.output(self.buzzerPin, GPIO.HIGH)
 
 
-    def buzz(self):
+    # def buzz(self):
 
-        while self.running:
+    #     while self.running:
 
-            if self.buzzing:
-                GPIO.output(self.buzzerPin, GPIO.LOW)
-                logging.info('Buzzing!')
+    #         if self.buzzing:
+    #             GPIO.output(self.buzzerPin, GPIO.LOW)
+    #             logging.info('Buzzing!')
             
-            else:
-                GPIO.output(self.buzzerPin, GPIO.HIGH)
+    #         else:
+    #             GPIO.output(self.buzzerPin, GPIO.HIGH)
             
-            sleep(self.sleepTime)
+    #         sleep(self.sleepTime)
 
-        GPIO.output(self.buzzerPin, GPIO.HIGH)
+    #     GPIO.output(self.buzzerPin, GPIO.HIGH)
 
 
     def move(self):
@@ -173,7 +170,6 @@ class PiTank(Thread):
                 GPIO.output(self.IN4, GPIO.LOW)
 
             elif self.movementState == PiTank.STOPPED:
-                # esta parado
                 GPIO.output(self.IN1, GPIO.LOW)
                 GPIO.output(self.IN2, GPIO.LOW)
                 GPIO.output(self.IN3, GPIO.LOW)
@@ -197,8 +193,8 @@ class PiTank(Thread):
             sleep(self.sleepTime)
 
 
-    def setSpeed(self, speed):
-        _speed = (speed/32767) * (self.maxSpeed - self.minSpeed) + self.minSpeed
+    def setSpeed(self, val):
+        _speed = (abs(val)/32767) * (self.maxSpeed - self.minSpeed) + self.minSpeed
         if _speed < self.maxSpeed and _speed > self.minSpeed:
             self.currentSpeed = _speed
 
@@ -213,17 +209,7 @@ class PiTank(Thread):
         if self.directionState == PiTank.LEFT:
             return self.currentSpeed * self.diferentialFactor
         return self.currentSpeed
-
-
-    def turnRight(self):
-        if self.directionState + 1 <= PiTank.RIGHT:
-            self.directionState += 1
-
-
-    def turnLeft(self):
-        if self.directionState - 1 >= PiTank.LEFT:
-            self.directionState -= 1
-
+    
 
     def run(self) -> None:
 
@@ -232,64 +218,63 @@ class PiTank(Thread):
             for ev in self.idev.read_loop():
 
                 msg, value = (ev.type, ev.code), ev.value
-                
+            
                 # forward or backward or stop
                 if msg == (3, 1):
 
-                    # forward or stop
+                    value -= 32768
+
+                    # forward
                     if value < 0:
 
-                        # stop
-                        if value == -1:
-                            self.movementState = PiTank.STOPPED
-                            self.directionState = PiTank.CENTER                            
-
-                        else:
-                            # forward 
-                            self.movementState = PiTank.FORWARD
-                            self.directionState = PiTank.CENTER
-                            self.setSpeed(-value)
+                        self.movementState = PiTank.FORWARD
+                        self.setSpeed(value)
+                        # self.directionState = PiTank.CENTER
 
                     # backward
-                    else:
+                    elif value > 0:
                         self.movementState = PiTank.BACKWARD
-                        self.directionState = PiTank.CENTER
                         self.setSpeed(value)
+                        # self.directionState = PiTank.CENTER
 
-    
-                # right or left
-                elif msg == (3, 3):
+                    # stop
+                    else:
+                            self.movementState = PiTank.STOPPED
+                            # self.directionState = PiTank.CENTER                            
+
+                # rotate right/left
+                elif msg == (3, 0):
+
+                    value -= 32768
 
                     # right
                     if value > 0:
-
-                        self.turnRight()
-
+                        self.movementState = PiTank.ROTATERIGHT
+                        
                     # left
+                    elif value < 0:
+                        self.movementState = PiTank.ROTATELEFT
+                    
+                    # center
                     else:
+                        self.directionState = PiTank.CENTER
 
-                        if value == 0:
-
-                            self.directionState = PiTank.CENTER
-
-                        else:
-
-                            self.turnLeft()
-
-
-                elif msg == (1, 305):
-
-                    # B button
-                    if value == 1:
-
-                        self.buzzing = True
-
+                # soft turn left/right
+                elif msg == (3,2):
+                    
+                    if value == 0:
+                        self.directionState = PiTank.CENTER
                     else:
+                        self.directionState = PiTank.LEFT
 
-                        self.buzzing = False
+                elif msg == (3,5):
 
+                    if value == 0:
+                        self.directionState = PiTank.CENTER
+                    else:
+                        self.directionState = PiTank.RIGHT        
 
-                elif msg == (1,315):
+                elif msg == (1,311):
 
                     if value == 1:
                         self.startShutdownCountdown()
@@ -297,25 +282,10 @@ class PiTank(Thread):
                     else:
                         self.stopShutdownCountdown()
 
-
                 # event not mapped
                 else:
-                    evc = evdev.categorize(ev)
-                    logging.debug(ev)
-                    logging.debug(evc)
-
-                """
-                elif msg == "rotate_right_pressed":
-                    self.movementState = PiTank.ROTATERIGHT
-                    self.directionState = PiTank.CENTER
-
-                elif msg == "rotate_left_pressed":
-                     self.movementState = PiTank.ROTATELEFT
-                     self.directionState = PiTank.CENTER
+                    logging.debug(f'msg: {msg} value: {value}')
             
-
-                """
-
             logging.info('Main thread shutting down...')
 
 
@@ -327,7 +297,8 @@ if __name__ == "__main__":
         idev = evdev.InputDevice(sys.argv[1])
     except:
         for _idev in [evdev.InputDevice(i) for i in evdev.list_devices()]:
-            if _idev.name == 'Microsoft X-Box 360 pad':
+            # if _idev.name == 'Microsoft X-Box 360 pad':
+            if _idev.name == 'Wireless Controller':
                 idev = _idev
                 break
 
